@@ -80,7 +80,7 @@ def home(request):
     return render(request, 'home.html')
 
 def bat(request):
-    data = pd.read_csv(r'C:\Users\hudai\OneDrive\Desktop\Dream11_ScorePrediction\batting.csv')
+    data = pd.read_csv(r'C:\Users\Archana Sasidharan\Desktop\PROJECT\Dream11_ScorePrediction\batting.csv')
     plyr = data['Player'].sort_values().unique()
     tm1 = data['Team1'].sort_values().unique()
     tm2 = data['Team2'].sort_values().unique()
@@ -110,7 +110,33 @@ def bat(request):
     return render(request,'batting.html',{'batsman':plyr,'team1':tm1,'team2':tm2})
 
 def bow(request):
-    return render(request,'bowling.html')
+    data = pd.read_csv(r'C:\Users\Archana Sasidharan\Desktop\PROJECT\Dream11_ScorePrediction\bowling.csv')
+    ply = data['PlayerName'].sort_values().unique()
+    tm11 = data['Team1'].sort_values().unique()
+    tm22 = data['Team2'].sort_values().unique()
+    if request.method == 'POST':
+        player = request.POST.get('bow_player')
+        team1 = request.POST.get('team1b')
+        team2 = request.POST.get('team2b')
+        over = request.POST.get('overs')
+        maiden = request.POST.get('maiden')
+        run = request.POST .get('run')
+        wicket = request.POST.get('wickets')
+        er = request.POST.get('er')
+        print(player,team1,team2,over,maiden,run,wicket,er)
+        if player == None or team1 == None or team2 == None:
+            print("null")
+            messages.warning(request,"*Please fill all the fields.. ")
+        else:
+            p_list = list(ply)
+            t1_list = list(tm11)
+            t2_list = list(tm22)
+            p_value,t1_value,t2_value = p_list.index(player),t1_list.index(team1),t2_list.index(team2)
+            print(p_value,t1_value,t2_value)
+            model = pickle.load(open('data/bow_model.pkl','rb'))
+            bow  = model.predict([[p_value,t1_value,t2_value,over,maiden,run,wicket,er]])
+            return render(request, 'bowling.html', {'score': bow[0]})
+    return render(request,'bowling.html',{'bowler':ply,'team1':tm11,'team2':tm22})
 
 def Logout(request):
     logout(request)
