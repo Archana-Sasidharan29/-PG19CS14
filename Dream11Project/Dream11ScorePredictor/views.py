@@ -80,7 +80,34 @@ def home(request):
     return render(request, 'home.html')
 
 def bat(request):
-    return render(request,'batting.html')
+    data = pd.read_csv(r'C:\Users\hudai\OneDrive\Desktop\Dream11_ScorePrediction\batting.csv')
+    plyr = data['Player'].sort_values().unique()
+    tm1 = data['Team1'].sort_values().unique()
+    tm2 = data['Team2'].sort_values().unique()
+    if request.method == 'POST':
+        player = request.POST.get('bat_player')
+        team1 = request.POST.get('team1')
+        team2 = request.POST.get('team2')
+        run = request.POST.get('runs')
+        ball = request.POST.get('balls')
+        four = request.POST .get('4s')
+        six = request.POST.get('6s')
+        ducks = request.POST.get('ducks')
+        sr = request.POST.get('sr')
+        print(player,team1,team2,run,ball,four,six,ducks,sr)
+        if player == None or team1 == None or team2 == None:
+            print("null")
+            messages.warning(request,"*Please fill all the fields.. ")
+        else:
+            p_list = list(plyr)
+            t1_list = list(tm1)
+            t2_list = list(tm2)
+            p_value,t1_value,t2_value = p_list.index(player),t1_list.index(team1),t2_list.index(team2)
+            print(p_value,t1_value,t2_value)
+            model = pickle.load(open('data/bat_model.pkl','rb'))
+            bat = model.predict([[p_value,t1_value,t2_value,run,ball,four,six,ducks,sr]])
+            return render(request, 'batting.html', {'score': bat[0]})
+    return render(request,'batting.html',{'batsman':plyr,'team1':tm1,'team2':tm2})
 
 def bow(request):
     return render(request,'bowling.html')
